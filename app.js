@@ -21,7 +21,7 @@ const setupWrap = document.querySelector(".setup_wrap");
 
 closeCalloutButton.addEventListener("click", () => {
   mainContainer.classList.add("hidden_dropdown");
-  setupWrap.classList.remove("mt-10");
+  // setupWrap.classList.remove("mt-10");
 });
 
 
@@ -31,7 +31,7 @@ const wrapperBtn = document.querySelector("#wrapper_btn");
 const getSvgArray = Array.from(SvgIcons);
 const upIcon = getSvgArray[0].style.display = "block"
 const downIcon = getSvgArray[1].style.display = "none"
-console.log(getSvgArray)
+// console.log(getSvgArray)
 const wrapperContent = document.querySelector("#wrapperContent");
 
 
@@ -61,87 +61,80 @@ const steps = document.querySelectorAll(".card");
    });
  });
 
-const stepIcons = document.querySelectorAll('.step svg circle');
-  stepIcons.forEach((icon, index) => {
-      icon.addEventListener('dblclick', function () {
-        const progressBarDots = document.querySelectorAll('.progress-bar .dot');
-        progressBarDots[index].classList.toggle('marked');
-      });
-  });
+class StepIcons {
+  constructor(stepIndex) {
+    this.stepIndex = stepIndex;
+    this.icons = document.querySelectorAll(`.card:nth-child(${this.stepIndex + 1}) .step svg`);
+    this.completedIcon = this.icons[this.icons.length - 1];
+    this.loaderIcons = Array.from(this.icons).slice(2, this.icons.length - 1);
+    this.isLoading = false;
+    this.init();
+  }
+ 
+  init() {
+  const firstIcon = this.icons[0];
+  const secondIcon = this.icons[1];
 
+  firstIcon.addEventListener('mouseenter', () => this.toggleIcons(secondIcon, firstIcon));
+  firstIcon.addEventListener('mouseleave', () => this.toggleIcons(firstIcon, secondIcon));
 
-const firstIcon = document.querySelector(".step svg:nth-child(1)");
-const secondIcons = document.querySelector(".step svg:nth-child(2)");
+  secondIcon.addEventListener('mouseenter', () => this.toggleIcons(firstIcon, secondIcon));
+  secondIcon.addEventListener('mouseleave', () => this.toggleIcons(secondIcon, firstIcon));
 
-  firstIcon.addEventListener("mouseenter", () => {
-    firstIcon.style.display = "none";
-    secondIcons.style.display = "block";
-  }); 
+  secondIcon.addEventListener('click', () => this.handleIconClick());
+  this.completedIcon.addEventListener('click', () => this.resetIcons());
+  }
 
-  firstIcon.addEventListener("mouseleave", () => {
-    firstIcon.style.display = "block";
-    secondIcons.style.display = "none";
-  });
+  toggleIcons(iconToShow, iconToHide) {
+    iconToShow.style.display = 'block';
+    iconToHide.style.display = 'none';
+  }
 
+  handleIconClick() {
+    if (!this.isLoading) {
+      this.isLoading = true;
+      this.completedIcon.classList.remove('rotate-animation');
 
-const icons = document.querySelectorAll('.step svg');
-const secondIcon = icons[1];
-const loaderIcons = Array.from(icons).slice(2, 7); // Icons 3 to 8
-const completedIcon = icons[7]; // Icon 8
-const thirdIcons = icons[2];
-const fourthIcons = icons[3];
-const fifthIcons = icons[4];
-const sixthIcons = icons[5];
-const seventhIcons = icons[6];
-
-let isLoading = false;
-
-secondIcon.addEventListener('click', function () {
-    if (!isLoading) {
-        isLoading = true;
-        completedIcon.classList.remove('rotate-animation');
-
-        loaderIcons.forEach((icon, index) => {
+      this.loaderIcons.forEach((icon, index) => {
+        setTimeout(() => {
+          icon.style.display = 'block';
+          icon.classList.add('rotate-animation');
+          if (index === this.loaderIcons.length - 1) {
             setTimeout(() => {
-              icon.style.display = 'block'; 
-                icon.classList.add('rotate-animation'); 
-                if (index === loaderIcons.length - 1) {
-                    setTimeout(() => {
-                        loaderIcons.forEach((icon) => {
-                            icon.classList.remove('rotate-animation');
-                           
-                        });
-                        isLoading = false; 
-                        completedIcon.style.display = "block";
-                        completedIcon.style.pointerEvents = "auto";
-                        completedIcon.classList.toggle('completed');
-                    }, 100); 
-                }
-            }, index * 100); 
-        });
+              this.loaderIcons.forEach((icon) => icon.classList.remove('rotate-animation'));
+              this.isLoading = false;
+              this.completedIcon.style.display = 'block';
+              this.completedIcon.classList.toggle('completed');
+            }, 100);
+          }
+        }, index * 100);
+      });
     } else {
-        loaderIcons.forEach((icon) => {
-            icon.classList.remove('rotate-animation');
-        });
-        isLoading = false;
+      this.loaderIcons.forEach((icon) => icon.classList.remove('rotate-animation'));
+      this.isLoading = false;
     }
-});
+  }
 
+  resetIcons() {
+    if (this.isLoading) return;
 
-//toggle the mark
-completedIcon.addEventListener('click', function () {
-    if (isLoading) return;
-    
-  completedIcon.classList.toggle('completed');
-  completedIcon.style.display = 'none';
-  secondIcon.style.display = 'none'
-  thirdIcons.style.display = "none"
-  fourthIcons.style.display = "none"
-  fifthIcons.style.display = "none"
-  sixthIcons.style.display = "none"
-  seventhIcons.style.display = "none"
-  eightIcons.style.display = "none"
-    
-  firstIcon.style.display = 'block';
-});
+    this.completedIcon.classList.toggle('completed');
+    this.completedIcon.style.display = 'none';
+    this.icons[0].style.display = 'block';
+    this.icons[1].style.display = 'none';
+    this.icons[2].style.display = 'none';
+    this.icons[3].style.display = 'none';
+    this.icons[4].style.display = 'none';
+    this.icons[5].style.display = 'none';
+    this.icons[6].style.display = 'none';
+    this.icons[7].style.display = 'none';
+  }
+}
+
+// Initialize each step
+let step1 = new StepIcons(0);
+let step2 = new StepIcons(1); 
+let step3 = new StepIcons(2); 
+let step4 = new StepIcons(3); 
+let step5 = new StepIcons(4); 
 
